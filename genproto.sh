@@ -14,8 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_emailservice_genproto]
+# [START gke_frontend_genproto]
 
-python -m grpc_tools.protoc -I../../protos --python_out=. --grpc_python_out=. ../../protos/demo.proto
+PATH=$PATH:$GOPATH/bin
+protodir=../../protos
 
-# [END gke_emailservice_genproto]
+protoc --go_out=plugins=grpc:genproto -I $protodir $protodir/demo.proto
+
+# [END gke_frontend_genproto]
