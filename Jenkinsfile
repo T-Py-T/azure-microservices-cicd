@@ -6,7 +6,6 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker logout"
                         sh "docker build -t tn850910/adservice:latest ."
                     }
                 }
