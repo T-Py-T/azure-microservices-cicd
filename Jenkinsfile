@@ -109,7 +109,7 @@ pipeline {
                             sed -i 's|image: ${env.DOCKERHUB_REPO}/adservice:.*|image: ${env.DOCKERHUB_REPO}/adservice:${versionTag}|' deployment-service.yml
                             git add deployment-service.yml
                             git commit -m "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" || echo "No changes to commit"
-                            git push origin Infra-Steps
+                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')} Infra-Steps
                         """
                     }
                 }
