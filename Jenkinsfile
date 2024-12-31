@@ -16,6 +16,7 @@ pipeline {
         stage('Compile') { 
             steps {  
                 dir('path/to/your/gradle/project') { // Change to the directory containing the build.gradle file
+                    sh "chmod +x gradlew"
                     sh "./gradlew compileJava" 
                 }
             } 
