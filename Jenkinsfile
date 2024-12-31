@@ -19,6 +19,12 @@ pipeline {
                 sh "./gradlew compileJava" 
             } 
         }
+
+        stage('Format Code') {
+            steps {
+                sh "./gradlew googleJavaFormat"
+            }
+        }
         
         stage('Build') { 
             steps {  
