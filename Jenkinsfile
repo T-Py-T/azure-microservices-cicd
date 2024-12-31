@@ -103,7 +103,7 @@ pipeline {
                 script {
                     def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     sh """
-                        sed -i 's|image: tnt850910/adservice:.*|image: tnt850910/adservice:${versionTag}|' deployment.yaml
+                        sed -i 's|image: tnt850910/adservice:.*|image: tnt850910/adservice:${versionTag}|' deployment-service.yml
                     """
                 }
             }
@@ -116,7 +116,7 @@ pipeline {
                     sh """
                         git config user.email "you@example.com"
                         git config user.name "Your Name"
-                        git add deployment.yaml
+                        git add deployment-service.yml
                         git commit -m "Update Docker image to tnt850910/adservice:${versionTag}"
                         git push origin Infra-Steps
                     """
