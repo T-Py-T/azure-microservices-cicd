@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         MAJOR_VERSION = '1' // Define the major version here or in the Jenkins job configuration
+        DOCKERHUB_REPO = 'tnt850910' // Define the DockerHub repository here
+        GIT_REPO_URL = 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' // Define the Git repository URL here
     }
 
     tools {
@@ -19,7 +21,7 @@ pipeline {
 
         stage('Pull Repo') { 
             steps { 
-                git branch: 'adservice', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
+                git branch: 'adservice', credentialsId: 'git-cred', url: "${env.GIT_REPO_URL}" 
             } 
         }
         
@@ -60,7 +62,7 @@ pipeline {
                 script { 
                     def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker build -t tnt850910/adservice:${versionTag} ."
+                        sh "docker build -t ${env.DOCKERHUB_REPO}/adservice:${versionTag} ."
                     } 
                 } 
             } 
@@ -70,7 +72,7 @@ pipeline {
             steps { 
                 script {
                     def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
-                    sh "trivy image --format table -o trivy-image-report.html tnt850910/adservice:${versionTag}" 
+                    sh "trivy image --format table -o trivy-image-report.html ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
                 }
             } 
         }
@@ -80,7 +82,7 @@ pipeline {
                 script { 
                     def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker push tnt850910/adservice:${versionTag}" 
+                        sh "docker push ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
                     } 
                 } 
             } 
@@ -94,30 +96,20 @@ pipeline {
 
         stage('Pull Infra-Steps Repo') { 
             steps { 
-                git branch: 'Infra-Steps', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
+                git branch: 'Infra-Steps', credentialsId: 'git-cred', url: "${env.GIT_REPO_URL}" 
             } 
         }
 
-        stage('Update Deployment YAML') {
+        stage('Update and Commit Deployment YAML') {
             steps {
                 script {
                     def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     sh """
-                        sed -i 's|image: tnt850910/adservice:.*|image: tnt850910/adservice:${versionTag}|' deployment-service.yml
-                    """
-                }
-            }
-        }
-
-        stage('Commit Changes') {
-            steps {
-                script {
-                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
-                    sh """
-                        git config user.email "you@example.com"
-                        git config user.name "Your Name"
+                        sed -i 's|image: ${env.DOCKERHUB_REPO}/adservice:.*|image: ${env.DOCKERHUB_REPO}/adservice:${versionTag}|' deployment-service.yml
+                        git config user.email "jenkins@example.com"
+                        git config user.name "Jenkins"
                         git add deployment-service.yml
-                        git commit -m "Update Docker image to tnt850910/adservice:${versionTag}"
+                        git commit -m "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" || echo "No changes to commit"
                         git push origin Infra-Steps
                     """
                 }
