@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        gradle 'gradle8' // Ensure 'gradle6' is the name of the Gradle installation in Jenkins
+        gradle 'gradle8' // Ensure 'gradle8' is the name of the Gradle installation in Jenkins
         jdk 'jdk17'      // Ensure 'jdk17' is the name of the JDK installation in Jenkins
     }
 
@@ -15,26 +15,20 @@ pipeline {
         
         stage('Compile') { 
             steps {  
-                dir('path/to/your/gradle/project') { // Change to the directory containing the build.gradle file
-                    sh "chmod +x ./gradlew"
-                    sh "./gradlew compileJava" 
-                }
+                sh "chmod +x ./gradlew"
+                sh "./gradlew compileJava" 
             } 
         }
         
         stage('Build') { 
             steps {  
-                dir('path/to/your/gradle/project') { // Change to the directory containing the build.gradle file
-                    sh "./gradlew build" 
-                }
+                sh "./gradlew build" 
             } 
         }
         
         stage('Test') { 
             steps { 
-                dir('path/to/your/gradle/project') { // Change to the directory containing the build.gradle file
-                    sh "./gradlew test" 
-                }
+                sh "./gradlew test" 
             } 
         }
         
