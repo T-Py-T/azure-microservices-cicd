@@ -4,9 +4,10 @@ pipeline {
     environment {
         MAJOR_VERSION = '1'
         DOCKERHUB_REPO = 'tnt850910'
+        BRANCH = 'adservice'
         GIT_REPO_URL = 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd'
         VERSION_TAG = "${MAJOR_VERSION}.${BUILD_NUMBER}"
-        DOCKER_IMAGE = "${DOCKERHUB_REPO}/adservice:${VERSION_TAG}"
+        DOCKER_IMAGE = "${DOCKERHUB_REPO}/${BRANCH}:${VERSION_TAG}"
     }
     tools {
         gradle 'gradle8'
@@ -18,7 +19,7 @@ pipeline {
         stage('Pull Repo') { 
             steps { 
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    git branch: 'adservice', url: "https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')}"
+                    git branch: ${env.BRANCH}, url: "https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')}"
                 }}}
         stage('Gradle Compile') { 
             steps {  
@@ -28,15 +29,16 @@ pipeline {
         // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
         stage('Gradle Build') {steps {sh "./gradlew build"}}
         // stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
-        stage('Trivy FS Scan') {steps {sh "trivy fs --format table -o fs.html ." }}       
+        stage('Trivy FS Scan') {steps {sh "trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o fs.html ." }}       
         stage('Build & Tag Docker Image') { 
             steps {script { 
                 withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                    sh "echo DOCKER_IMAGE: ${env.DOCKER_IMAGE} "
                     sh "docker build -t ${env.DOCKER_IMAGE} ."
                 }}}}
         stage('Docker Image Scan') { 
             steps {script {
-                sh "trivy image --format table -o trivy-image-report.html ${env.DOCKER_IMAGE}" 
+                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE}" 
                 }}}       
         stage('Push Docker Image') {
             steps { 
