@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         gradle 'gradle8' // Ensure 'gradle8' is the name of the Gradle installation in Jenkins
-        jdk 'jdk17'      // Ensure 'jdk17' is the name of the JDK installation in Jenkins
+        jdk 'jdk19'      // Ensure 'jdk17' is the name of the JDK installation in Jenkins
     }
 
     stages {
