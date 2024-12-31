@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Pull Repo') { steps { git branch: 'main', credentialsId: 'git-cred', url: '{repo}' } }
+        stage('Pull Repo') { steps { git branch: 'adservice', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' } }
         
         stage('Compile') { steps {  sh  "mvn compile" } }
         
