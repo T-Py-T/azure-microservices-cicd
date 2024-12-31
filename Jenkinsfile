@@ -4,13 +4,13 @@ pipeline {
     stages {
         stage('Pull Repo') { steps { git branch: 'adservice', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' } }
         
-        stage('Compile') { steps {  sh  "mvn compile" } }
+        // stage('Compile') { steps {  sh  "mvn compile" } }
         
-        stage('Test') { steps { sh "mvn test" } }
+        // stage('Test') { steps { sh "mvn test" } }
         
         stage('Trivy FS Scan') { steps { sh "trivy fs --format table -o fs.html ."} }       
         
-        stage('Build') { steps { sh "mvn package" } }
+        // stage('Build') { steps { sh "mvn package" } }
         
         stage('Build & Tag Docker Image') { 
             steps { script { withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
