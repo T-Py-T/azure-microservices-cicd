@@ -19,7 +19,7 @@ pipeline {
 
         stage('Pull Repo') { 
             steps { 
-                git branch: 'infra-steps', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
+                git branch: 'adservice', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
             } 
         }
         
@@ -86,12 +86,24 @@ pipeline {
             } 
         }
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir() // Clean the workspace
+            }
+        }
+
+        stage('Pull Infra-Steps Repo') { 
+            steps { 
+                git branch: 'infra-steps', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
+            } 
+        }
+
         stage('Update Deployment YAML') {
             steps {
                 script {
                     def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     sh """
-                        sed -i 's|image: tnt850910/adservice:.*|image: tnt850910/adservice:${versionTag}|' deployment-service.yml
+                        sed -i 's|image: tnt850910/adservice:.*|image: tnt850910/adservice:${versionTag}|' deployment.yaml
                     """
                 }
             }
@@ -100,10 +112,11 @@ pipeline {
         stage('Commit Changes') {
             steps {
                 script {
+                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     sh """
-                        git config user.email "jenkins@example.com"
-                        git config user.name "Jenkins"
-                        git add deployment-service.yml
+                        git config user.email "you@example.com"
+                        git config user.name "Your Name"
+                        git add deployment.yaml
                         git commit -m "Update Docker image to tnt850910/adservice:${versionTag}"
                         git push origin infra-steps
                     """
