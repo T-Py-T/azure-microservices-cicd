@@ -1,6 +1,6 @@
 # Jenkins File
 
-## DO NOT EDIT Jenkinsfile. This will cause issues for the service pipeline
+## DO NOT EDIT Jenkinsfile. This will cause issues for the service pipeline.
 
 ## Ad Service
 The Ad service provides advertisement based on context keys. If no context keys are provided then it returns random ads.
