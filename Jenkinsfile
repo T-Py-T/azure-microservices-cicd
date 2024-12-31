@@ -94,7 +94,7 @@ pipeline {
 
         stage('Pull Infra-Steps Repo') { 
             steps { 
-                git branch: 'infra-steps', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
+                git branch: 'Infra-Steps', credentialsId: 'git-cred', url: 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd' 
             } 
         }
 
@@ -118,7 +118,7 @@ pipeline {
                         git config user.name "Your Name"
                         git add deployment.yaml
                         git commit -m "Update Docker image to tnt850910/adservice:${versionTag}"
-                        git push origin infra-steps
+                        git push origin Infra-Steps
                     """
                 }
             }
