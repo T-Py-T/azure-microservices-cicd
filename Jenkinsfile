@@ -23,7 +23,7 @@ pipeline {
             } 
         }
         
-        stage('Compile') { 
+        stage('Gradle Compile') { 
             steps {  
                 sh "chmod +x ./gradlew"
                 sh "./gradlew compileJava" 
@@ -36,14 +36,14 @@ pipeline {
         //     }
         // }
         
-        stage('Build') { 
+        stage('Gradle Build') { 
             steps {  
                 sh "./gradlew build" 
             } 
         }
 
         // There are no tests in the java branch currently        
-        // stage('Test') { 
+        // stage('Gradle Test') { 
         //     steps { 
         //         sh "./gradlew test" 
         //     } 
