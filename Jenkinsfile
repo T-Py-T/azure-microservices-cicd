@@ -102,16 +102,16 @@ pipeline {
 
         stage('Update and Commit Deployment YAML') {
             steps {
-                script {
-                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
-                    sh """
-                        sed -i 's|image: ${env.DOCKERHUB_REPO}/adservice:.*|image: ${env.DOCKERHUB_REPO}/adservice:${versionTag}|' deployment-service.yml
-                        git config user.email "jenkins@example.com"
-                        git config user.name "Jenkins"
-                        git add deployment-service.yml
-                        git commit -m "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" || echo "No changes to commit"
-                        git push origin Infra-Steps
-                    """
+                withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    script {
+                        def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+                        sh """
+                            sed -i 's|image: ${env.DOCKERHUB_REPO}/adservice:.*|image: ${env.DOCKERHUB_REPO}/adservice:${versionTag}|' deployment-service.yml
+                            git add deployment-service.yml
+                            git commit -m "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" || echo "No changes to commit"
+                            git push origin Infra-Steps
+                        """
+                    }
                 }
             }
         }
