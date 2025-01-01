@@ -6,7 +6,6 @@ pipeline {
         DOCKERHUB_REPO = 'tnt850910'
         GIT_REPO_URL = 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd'
         VERSION_TAG = "${MAJOR_VERSION}.${BUILD_NUMBER}"
-        DOCKER_IMAGE = "${DOCKERHUB_REPO}/adservice:${VERSION_TAG}"
     }
     tools {
         gradle 'gradle8'
@@ -17,9 +16,8 @@ pipeline {
         stage('Clean Repo') {steps {deleteDir()}}
         stage('Pull Repo') { 
             steps { 
-                withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    git branch: 'adservice', url: "https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')}"
-                }}}
+                git branch: 'adservice', credentialsId: 'git-cred', url: "${env.GIT_REPO_URL}" 
+            }}
         stage('Gradle Compile') { 
             steps {  
                 sh "chmod +x ./gradlew"
@@ -31,33 +29,35 @@ pipeline {
         stage('Trivy FS Scan') {steps {sh "trivy fs --format table -o fs.html ." }}       
         stage('Build & Tag Docker Image') { 
             steps {script { 
-                withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                    sh "docker build -t ${env.DOCKER_IMAGE} ."
+                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "docker build -t ${env.DOCKERHUB_REPO}/adservice:${versionTag} ."
                 }}}}
         stage('Docker Image Scan') { 
             steps {script {
-                sh "trivy image --format table -o trivy-image-report.html ${env.DOCKER_IMAGE}" 
+                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+                    sh "trivy image --format table -o trivy-image-report.html ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
                 }}}       
         stage('Push Docker Image') {
-            steps { 
-                script {
+            steps {script {
+                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker push ${env.DOCKER_IMAGE}" 
+                        sh "docker push ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
                 }}}}
         stage('Clean Workspace') {steps {deleteDir()}}
         stage('Pull Infra-Steps Repo') { 
             steps { 
-                withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    git branch: 'Infra-Steps', url: "https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')}"
-                }}}
+                git branch: 'Infra-Steps', credentialsId: 'git-cred', url: "${env.GIT_REPO_URL}" 
+            } 
         stage('Update and Commit Deployment YAML') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     script {
+                        def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
                         sh """
-                            sed -i 's|image: ${env.DOCKERHUB_REPO}/adservice:.*|image: ${env.DOCKER_IMAGE} |' deployment-service.yml
+                            sed -i 's|image: ${env.DOCKERHUB_REPO}/adservice:.*|image: ${env.DOCKERHUB_REPO}/adservice:${versionTag}|' deployment-service.yml
                             git add deployment-service.yml
-                            git commit -m "Update Docker image to ${env.DOCKER_IMAGE}" || echo "No changes to commit"
+                            git commit -m "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" || echo "No changes to commit"
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')} Infra-Steps
                         """
                     }}}}
@@ -65,9 +65,9 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     script{
-                    sh """
-                        gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
-                    """
+                        sh """
+                            gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
+                        """
                 }}}}
     }
 }
