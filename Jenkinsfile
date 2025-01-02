@@ -76,9 +76,8 @@ pipeline {
         stage('Create Pull Request') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    script {
+                    withEnv(["GITHUB_TOKEN=${GIT_PASSWORD}"]) {
                         sh """
-                            export GITHUB_TOKEN=${GIT_PASSWORD}
                             gh auth login --with-token
                             gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
                         """
