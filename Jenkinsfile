@@ -20,14 +20,6 @@ pipeline {
             [usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
             git branch: "${env.BRANCH}", url: "https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')}"
         }}}
-        stage('Gradle Compile') { 
-            steps {  
-                sh "chmod +x ./gradlew"
-                sh "./gradlew compileJava" 
-            }}
-        // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
-        stage('Gradle Build') {steps {sh "./gradlew build"}}
-        stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
         stage('Trivy FS Scan') {
             steps {
                 script {
@@ -36,6 +28,14 @@ pipeline {
                     if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
+        stage('Gradle Compile') { 
+            steps {  
+                sh "chmod +x ./gradlew"
+                sh "./gradlew compileJava" 
+            }}
+        // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
+        stage('Gradle Build') {steps {sh "./gradlew build"}}
+        stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
         stage('Build & Tag Docker Image') { 
             steps {script { 
                 withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
