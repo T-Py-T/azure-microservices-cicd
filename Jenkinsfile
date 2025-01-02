@@ -28,7 +28,7 @@ pipeline {
         // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
         stage('Gradle Build') {steps {sh "./gradlew build"}}
         // stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
-        stage('Trivy FS Scan') {steps {sh "trivy fs ---severity HIGH,CRITICAL --format table ."}}       
+        stage('Trivy FS Scan') {steps {sh "trivy fs --severity HIGH,CRITICAL --format table -o fs.html . | tee fs.html"}}       
         stage('Build & Tag Docker Image') { 
             steps {script { 
                 withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
@@ -37,7 +37,7 @@ pipeline {
                 }}}}
         stage('Docker Image Scan') { 
             steps {script {
-                sh "trivy image --severity HIGH,CRITICAL --format table ${env.DOCKER_IMAGE}" 
+                sh "trivy image --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE} | tee trivy-image-report.html" 
                 }}}       
         stage('Push Docker Image') {
             steps { 
@@ -45,6 +45,16 @@ pipeline {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                         sh "docker push ${env.DOCKER_IMAGE}" 
                 }}}}
+                
+        // stage('Scan Docker Image') {
+        //     steps {
+        //         script {
+        //             def trivyOutput = sh(script: "trivy image $APP_NAME:latest", returnStdout: true).trim()
+        //             println trivyOutput // Display Trivy scan results
+        //             if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
+        //             else { echo "Vulnerabilities found in the Docker image." }
+        //         }}}
+        
         stage('Clean Workspace') {steps {deleteDir()}}
         stage('Pull Infra-Steps Repo') { 
             steps { 
@@ -62,6 +72,7 @@ pipeline {
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')} Infra-Steps
                         """
                     }}}}
+
         stage('Create Pull Request') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
@@ -70,5 +81,6 @@ pipeline {
                         gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
                     """
                 }}}
+
     }
 }
