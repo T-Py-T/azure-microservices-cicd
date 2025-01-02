@@ -78,7 +78,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     script {
                         sh """
-                            echo "${GIT_PASSWORD}" | gh auth login --with-token
+                            export GITHUB_TOKEN=${GIT_PASSWORD}
+                            gh auth login --with-token
                             gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
                         """
                     }}}}
