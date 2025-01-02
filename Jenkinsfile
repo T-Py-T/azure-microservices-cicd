@@ -43,9 +43,9 @@ pipeline {
             steps { 
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker push ${env.DOCKER_IMAGE}" 
+                        sh "docker push ${env.DOCKER_IMAGE}"
                 }}}}
-                
+
         // stage('Scan Docker Image') {
         //     steps {
         //         script {
@@ -76,11 +76,11 @@ pipeline {
         stage('Create Pull Request') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    sh """
-                        gh auth login --with-token <<< "${GIT_PASSWORD}"
-                        gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
-                    """
-                }}}
-
+                    script {
+                        sh '''
+                            gh auth login --with-token <<< "${GIT_PASSWORD}"
+                            gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
+                        '''
+                    }}}}
     }
 }
