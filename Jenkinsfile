@@ -28,19 +28,21 @@ pipeline {
         // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
         stage('Gradle Build') {steps {sh "./gradlew build"}}
         // stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
-        stage('Trivy FS Scan') {steps {sh "trivy fs --severity HIGH,CRITICAL --format table -o fs.html . | tee fs.html"}}       
+        stage('Trivy FS Scan') {
+            steps {
+                script {
+                    def trivyOutput = sh(script: "trivy fs --severity HIGH,CRITICAL --format table .", returnStdout: true).trim()
+                    println trivyOutput // Display Trivy scan results
+                    if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
+                    else { echo "Vulnerabilities found in the Docker image." }
+                }}}
         stage('Build & Tag Docker Image') { 
             steps {script { 
                 withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                     sh "echo DOCKER_IMAGE: ${env.DOCKER_IMAGE} "
                     sh "docker build -t ${env.DOCKER_IMAGE} ."
                 }}}}
-        stage('Docker Image Scan') { 
-            steps {script {
-                sh "trivy image --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE} | tee trivy-image-report.html" 
-                }}}
-
-        stage('Scan Docker Image') {
+        stage('Docker Image Scan') {
             steps {
                 script {
                     def trivyOutput = sh(script: "trivy image --severity HIGH,CRITICAL --format table ${env.DOCKER_IMAGE}", returnStdout: true).trim()
@@ -48,14 +50,12 @@ pipeline {
                     if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
-
         stage('Push Docker Image') {
             steps { 
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                         sh "docker push ${env.DOCKER_IMAGE}"
                 }}}}
-
         stage('Clean Workspace') {steps {deleteDir()}}
         stage('Pull Infra-Steps Repo') { 
             steps { 
