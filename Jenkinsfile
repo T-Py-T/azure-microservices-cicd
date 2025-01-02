@@ -38,7 +38,17 @@ pipeline {
         stage('Docker Image Scan') { 
             steps {script {
                 sh "trivy image --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE} | tee trivy-image-report.html" 
-                }}}       
+                }}}
+
+        stage('Scan Docker Image') {
+            steps {
+                script {
+                    def trivyOutput = sh(script: "trivy image --severity HIGH,CRITICAL --format table ${env.DOCKER_IMAGE}", returnStdout: true).trim()
+                    println trivyOutput // Display Trivy scan results
+                    if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
+                    else { echo "Vulnerabilities found in the Docker image." }
+                }}}
+
         stage('Push Docker Image') {
             steps { 
                 script {
@@ -46,15 +56,6 @@ pipeline {
                         sh "docker push ${env.DOCKER_IMAGE}"
                 }}}}
 
-        // stage('Scan Docker Image') {
-        //     steps {
-        //         script {
-        //             def trivyOutput = sh(script: "trivy image $APP_NAME:latest", returnStdout: true).trim()
-        //             println trivyOutput // Display Trivy scan results
-        //             if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
-        //             else { echo "Vulnerabilities found in the Docker image." }
-        //         }}}
-        
         stage('Clean Workspace') {steps {deleteDir()}}
         stage('Pull Infra-Steps Repo') { 
             steps { 
@@ -73,14 +74,16 @@ pipeline {
                         """
                     }}}}
 
-        stage('Create Pull Request') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    withEnv(["GITHUB_TOKEN=${GIT_PASSWORD}"]) {
-                        sh """
-                            gh auth login --with-token
-                            gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
-                        """
-                    }}}}
+        // ** PR is not created gh command is failing come back later**
+        // stage('Create Pull Request') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+        //             withEnv(["GITHUB_TOKEN=${GIT_PASSWORD}"]) {
+        //                 sh """
+        //                     gh auth login --with-token
+        //                     gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
+        //                 """
+        //             }}}}
+
     }
 }
