@@ -27,7 +27,7 @@ pipeline {
             }}
         // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
         stage('Gradle Build') {steps {sh "./gradlew build"}}
-        // stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
+        stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
         stage('Trivy FS Scan') {
             steps {
                 script {
