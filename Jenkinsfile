@@ -62,25 +62,13 @@ pipeline {
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${env.GIT_REPO_URL.replace('https://', '')} Infra-Steps
                         """
                     }}}}
-
         stage('Create Pull Request') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    script{
-                        def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"bei 
-                        sh """
-                            gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
-                        """
-        }}}}
-
-        // stage('Create Pull Request') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-        //             sh """
-        //                 gh auth login --with-token <<< "${GIT_PASSWORD}"
-        //                 gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
-        //             """
-        //         }}}
-
+                    sh """
+                        gh auth login --with-token <<< "${GIT_PASSWORD}"
+                        gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
+                    """
+                }}}
     }
 }
