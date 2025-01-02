@@ -654,7 +654,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: tnt850910/adservice:1.66 
+        image: tnt850910/adservice:1.67 
         ports:
         - containerPort: 9555
         env:
