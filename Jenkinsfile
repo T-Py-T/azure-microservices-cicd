@@ -27,30 +27,25 @@ pipeline {
         stage('Gradle Build') {steps {sh "./gradlew build"}}
         // stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
         stage('Trivy FS Scan') {steps {sh "trivy fs --format table -o fs.html ." }}       
-        stage('Build & Tag Docker Image') { 
-            steps {script { 
-                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker build -t ${env.DOCKERHUB_REPO}/adservice:${versionTag} ."
-                }}}}
-        stage('Docker Image Scan') { 
-            steps {script {
-                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
-                    sh "trivy image --format table -o trivy-image-report.html ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
-                }}}       
-        stage('Push Docker Image') {
-            steps {script {
-                    def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker push ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
-                }}}}
+        stage('Build & Tag Docker Image') { steps {script { 
+            def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+            withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                sh "docker build -t ${env.DOCKERHUB_REPO}/adservice:${versionTag} ."
+            }}}}
+        stage('Docker Image Scan') {steps {script {
+            def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+            sh "trivy image --format table -o trivy-image-report.html ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
+            }}}       
+        stage('Push Docker Image') {steps {script {
+            def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+            withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                sh "docker push ${env.DOCKERHUB_REPO}/adservice:${versionTag}" 
+            }}}}
         stage('Clean Workspace') {steps {deleteDir()}}
-        stage('Pull Infra-Steps Repo') { 
-            steps { 
+        stage('Pull Infra-Steps Repo') {steps { 
                 git branch: 'Infra-Steps', credentialsId: 'git-cred', url: "${env.GIT_REPO_URL}" 
             }}
-        stage('Update and Commit Deployment YAML') {
-            steps {
+        stage('Update and Commit Deployment YAML') {steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     script {
                         def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
@@ -65,8 +60,9 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     script{
+                        def versionTag = "${env.MAJOR_VERSION}.${env.BUILD_NUMBER}"bei 
                         sh """
-                            gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
+                            gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${versionTag}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
                         """
         }}}}
     }
