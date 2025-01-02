@@ -38,7 +38,7 @@ pipeline {
                 }}}}
         stage('Docker Image Scan') { 
             steps {script {
-                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE} | tee trivy-image-report.html"" 
+                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE} | tee trivy-image-report.html" 
                 }}}       
         stage('Push Docker Image') {
             steps { 
