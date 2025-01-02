@@ -42,7 +42,7 @@ pipeline {
                     sh "echo DOCKER_IMAGE: ${env.DOCKER_IMAGE} "
                     sh "docker build -t ${env.DOCKER_IMAGE} ."
                 }}}}
-        stage('Docker Image Scan') {
+        stage('Trivy Image Scan') {
             steps {
                 script {
                     def trivyOutput = sh(script: "trivy image --severity HIGH,CRITICAL --format table ${env.DOCKER_IMAGE}", returnStdout: true).trim()
