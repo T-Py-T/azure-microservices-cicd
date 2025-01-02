@@ -48,7 +48,7 @@ pipeline {
         stage('Pull Infra-Steps Repo') { 
             steps { 
                 git branch: 'Infra-Steps', credentialsId: 'git-cred', url: "${env.GIT_REPO_URL}" 
-            } 
+            }}
         stage('Update and Commit Deployment YAML') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git-cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
@@ -68,6 +68,6 @@ pipeline {
                         sh """
                             gh pr create --title "Update Docker image to ${env.DOCKERHUB_REPO}/adservice:${env.VERSION_TAG}" --body "This PR updates the Docker image to ${env.DOCKER_IMAGE}" --base main --head Infra-Steps
                         """
-                }}}}
+        }}}}
     }
 }
