@@ -29,7 +29,7 @@ pipeline {
         // stage('Format Code') {steps {sh "./gradlew googleJavaFormat"}} // FORMATTING NOT WORKING (GOOGLE FORMAT FAILS)
         stage('Gradle Build') {steps {sh "./gradlew build"}}
         // stage('Gradle Test') {steps {sh "./gradlew test"}} // There are no tests in the java branch currently 
-        stage('Trivy FS Scan') {steps {sh "trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o fs.html ." }}       
+        stage('Trivy FS Scan') {steps {sh "trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o fs.html . | tee fs.html"}}       
         stage('Build & Tag Docker Image') { 
             steps {script { 
                 withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
@@ -38,7 +38,7 @@ pipeline {
                 }}}}
         stage('Docker Image Scan') { 
             steps {script {
-                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE}" 
+                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-report.html ${env.DOCKER_IMAGE} | tee trivy-image-report.html"" 
                 }}}       
         stage('Push Docker Image') {
             steps { 

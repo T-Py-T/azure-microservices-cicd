@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:19@sha256:f3fbf1ad599d4b5dbdd7ceb55708d10cb9fafb08e094ef91e92aa63b520a232e as builder
+#FROM eclipse-temurin:19@sha256:f3fbf1ad599d4b5dbdd7ceb55708d10cb9fafb08e094ef91e92aa63b520a232e as builder
+# ^^ had an (unsopported apline )
+# https://aquasecurity.github.io/trivy/v0.58/docs/scanner/vulnerability#severity-selection for details.
+# 2025-01-02T02:20:19Z	WARN	This OS version is no longer supported by the distribution	family="alpine" version="3.17.1"
+
+FROM eclipse-temurin:19-jdk-alpine as builder
+
 
 WORKDIR /app
 
@@ -25,7 +31,12 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:a75ea64f676041562cd7d3a54a9764bbfb357b2bf1bebf46e2af73e62d32e36c as without-grpc-health-probe-bin
+# FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:a75ea64f676041562cd7d3a54a9764bbfb357b2bf1bebf46e2af73e62d32e36c as without-grpc-health-probe-bin
+# ^^ had an (unsopported apline )
+# https://aquasecurity.github.io/trivy/v0.58/docs/scanner/vulnerability#severity-selection for details.
+# 2025-01-02T02:20:19Z	WARN	This OS version is no longer supported by the distribution	family="alpine" version="3.17.1"
+
+FROM eclipse-temurin:19-jre-alpine as without-grpc-health-probe-bin
 
 RUN apk add --no-cache ca-certificates
 
