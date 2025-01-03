@@ -9,10 +9,9 @@ pipeline {
         VERSION_TAG = "${MAJOR_VERSION}.${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKERHUB_REPO}/${BRANCH}:${VERSION_TAG}"
     }
-    tools {
-        // Add .NET SDK tool if available in Jenkins
-        // dotnet 'dotnet-sdk-3.1' // Example tool name, ensure it matches your Jenkins configuration
-    }
+    // tools {
+    //     dotnet 'dotnet-sdk-3.1' // Example tool name, ensure it matches your Jenkins configuration
+    // }
     stages {
         // Clean the workspace
         stage('Clean Repo') {steps {deleteDir()}}
