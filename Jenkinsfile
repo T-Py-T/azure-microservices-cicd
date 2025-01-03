@@ -33,11 +33,10 @@ pipeline {
         stage('Build & Tag Docker Image') {
             steps {
                 script {
-                    dir('src') {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                         sh "echo DOCKER_IMAGE: ${env.DOCKER_IMAGE} "
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                    }}}}}
+                    }}}}
         stage('Trivy Image Scan') {
             steps {
                 script {
