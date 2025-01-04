@@ -29,7 +29,7 @@ pipeline {
                 }}}
         stage('Node Compile') {steps {
                 sh 'npm install'
-                sh 'npm run build'
+                sh 'npm build'
                 }}
         stage('Node Test') {steps {sh 'npm test'}}
         stage('Build & Tag Docker Image') {

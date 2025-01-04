@@ -5,7 +5,8 @@
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node index.js",
+    "test": "jest"
   },
   "author": "Jonathan Lui",
   "license": "ISC",
@@ -21,5 +22,8 @@
     "pino": "8.14.1",
     "simple-card-validator": "^1.1.0",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
   }
 }
