@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 'use strict';
 
 if (process.env.DISABLE_PROFILER) {
@@ -65,4 +64,10 @@ const PROTO_PATH = path.join(__dirname, '/proto/');
 
 const server = new HipsterShopServer(PROTO_PATH, PORT);
 
-server.listen();
+server.listen(() => {
+  console.log(`Server started on port ${PORT}`);
+  if (process.env.NODE_ENV === 'build') {
+    console.log("Build environment detected. Exiting...");
+    process.exit(0);
+  }
+});

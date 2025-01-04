@@ -30,7 +30,7 @@ pipeline {
                 }}}
         stage('Node Compile') {steps {
                 sh 'npm install'
-                sh 'PORT=50051 npm run build' // Set the PORT environment variable here
+                sh 'PORT=50051 NODE_ENV=build npm run build' // Set the PORT environment variable here
                 }}
         stage('Node Test') {steps {sh 'npm test'}}
         stage('Build & Tag Docker Image') {
