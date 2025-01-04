@@ -16,23 +16,23 @@
 
 'use strict';
 
-
-if(process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.")
-}
-else {
-  console.log("Profiler enabled.")
+if (process.env.DISABLE_PROFILER) {
+  console.log("Profiler disabled.");
+} else if (process.env.GOOGLE_CLOUD_PROJECT) {
+  console.log("Profiler enabled.");
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'paymentservice',
       version: '1.0.0'
-    }
+    },
+    projectId: process.env.GOOGLE_CLOUD_PROJECT
   });
+} else {
+  console.log("Profiler not configured. Skipping profiler setup.");
 }
 
-
-if(process.env.ENABLE_TRACING == "1") {
-  console.log("Tracing enabled.")
+if (process.env.ENABLE_TRACING == "1") {
+  console.log("Tracing enabled.");
   const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
   const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
   const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
@@ -41,19 +41,21 @@ if(process.env.ENABLE_TRACING == "1") {
 
   const provider = new NodeTracerProvider();
   
-  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR
+  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR;
 
-  provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
-  provider.register();
+  if (collectorUrl) {
+    provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({ url: collectorUrl })));
+    provider.register();
 
-  registerInstrumentations({
-    instrumentations: [new GrpcInstrumentation()]
-  });
+    registerInstrumentations({
+      instrumentations: [new GrpcInstrumentation()]
+    });
+  } else {
+    console.log("Collector URL not set. Skipping tracing setup.");
+  }
+} else {
+  console.log("Tracing disabled.");
 }
-else {
-  console.log("Tracing disabled.")
-}
-
 
 const path = require('path');
 const HipsterShopServer = require('./server');
