@@ -9,9 +9,9 @@ pipeline {
         VERSION_TAG = "${MAJOR_VERSION}.${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKERHUB_REPO}/${BRANCH}:${VERSION_TAG}"
     }
-    // tools {
-    //     go 'Go' // Ensure this matches your Jenkins Go tool configuration
-    // }
+    tools {
+        go 'go-1-19' // Ensure this matches your Jenkins Go tool configuration
+    }
     stages {
         // Clean the workspace
         stage('Clean Repo') {steps {deleteDir()}}
@@ -27,9 +27,9 @@ pipeline {
                     if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
-        // stage('Go Compile') {steps {sh 'go build ./...'}}
-        // stage('Go Build') {steps{sh 'go build -o output_binary ./...'}}
-        // stage('Go Test') {steps{sh 'go test ./...'}}
+        stage('Go Compile') {steps {sh 'go build ./...'}}
+        stage('Go Build') {steps{sh 'go build -o output_binary ./...'}}
+        stage('Go Test') {steps{sh 'go test ./...'}}
         stage('Build & Tag Docker Image') {
             steps {
                 script {
