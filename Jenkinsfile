@@ -28,7 +28,6 @@ pipeline {
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
         stage('Go Compile') {steps {sh 'go build ./...'}}
-        stage('Go Build') {steps{sh 'go build -o output_binary ./...'}}
         stage('Go Test') {steps{sh 'go test ./...'}}
         stage('Build & Tag Docker Image') {
             steps {
