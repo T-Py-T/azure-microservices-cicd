@@ -68,6 +68,8 @@ server.listen(() => {
   console.log(`Server started on port ${PORT}`);
   if (process.env.NODE_ENV === 'build') {
     console.log("Build environment detected. Exiting...");
-    process.exit(0);
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000); // Exit after 1 second
   }
 });
