@@ -8,6 +8,7 @@ pipeline {
         GIT_REPO_URL = 'https://github.com/T-Py-T/eks-jenkins-microservices-cicd'
         VERSION_TAG = "${MAJOR_VERSION}.${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKERHUB_REPO}/${BRANCH}:${VERSION_TAG}"
+        PORT = '50051' // Define the port here
     }
     tools {
         nodejs 'node-20.8.0' // Ensure this matches the name configured in Jenkins
@@ -29,7 +30,7 @@ pipeline {
                 }}}
         stage('Node Compile') {steps {
                 sh 'npm install'
-                sh 'npm run build'
+                sh 'PORT=50051 npm run build' // Set the PORT environment variable here
                 }}
         stage('Node Test') {steps {sh 'npm test'}}
         stage('Build & Tag Docker Image') {
