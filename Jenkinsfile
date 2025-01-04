@@ -28,11 +28,7 @@ pipeline {
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
         stage('Go Compile') {steps {sh 'go build ./...'}}
-        stage('Go Test') {steps {
-                // Need to install GCC for the Go test to work
-                // sh 'sudo apt-get update && sudo apt-get install -y gcc'
-                sh 'go test ./...'
-            }}
+        stage('Go Test') {steps {sh 'go test ./...'}}
         stage('Build & Tag Docker Image') {
             steps {
                 script {
