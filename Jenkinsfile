@@ -9,9 +9,9 @@ pipeline {
         VERSION_TAG = "${MAJOR_VERSION}.${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKERHUB_REPO}/${BRANCH}:${VERSION_TAG}"
     }
-    // tools {
-    //     nodejs 'node-20.8.0' // Ensure this matches the name configured in Jenkins
-    // }
+    tools {
+        nodejs 'node-20.8.0' // Ensure this matches the name configured in Jenkins
+    }
     stages {
         // Clean the workspace
         stage('Clean Repo') {steps {deleteDir()}}
@@ -27,8 +27,11 @@ pipeline {
                     if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
-        // stage('Node Compile') {steps {sh 'node build ./...'}}
-        // stage('Node Test') {steps {sh 'node test ./...'}}
+        stage('Node Compile') {steps {
+                sh 'npm install'
+                sh 'npm run build'
+                }}
+        stage('Node Test') {steps {sh 'npm test'}}
         stage('Build & Tag Docker Image') {
             steps {
                 script {
