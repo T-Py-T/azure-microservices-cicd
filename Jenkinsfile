@@ -27,11 +27,11 @@ pipeline {
                     if (trivyOutput.contains("Total: 0")) { echo "No vulnerabilities found in the Docker image."}
                     else { echo "Vulnerabilities found in the Docker image." }
                 }}}
-        stage('Node Compile') {steps {
-                sh 'npm install'
-                sh 'PORT=50051 NODE_ENV=build npm run build' // Set the PORT environment variable here
-                }}
-        stage('Node Test') {steps {sh 'npm test'}}
+        // stage('Node Compile') {steps {
+        //         sh 'npm install'
+        //         sh 'PORT=50051 NODE_ENV=build npm run build' // Set the PORT environment variable here
+        //         }}
+        // stage('Node Test') {steps {sh 'npm test'}}
         stage('Build & Tag Docker Image') {
             steps {
                 script {

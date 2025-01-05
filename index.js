@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 'use strict';
 
-if (process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.");
-} else if (process.env.GOOGLE_CLOUD_PROJECT) {
-  console.log("Profiler enabled.");
+
+if(process.env.DISABLE_PROFILER) {
+  console.log("Profiler disabled.")
+}
+else {
+  console.log("Profiler enabled.")
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'paymentservice',
       version: '1.0.0'
-    },
-    projectId: process.env.GOOGLE_CLOUD_PROJECT
+    }
   });
-} else {
-  console.log("Profiler not configured. Skipping profiler setup.");
 }
 
-if (process.env.ENABLE_TRACING == "1") {
-  console.log("Tracing enabled.");
+
+if(process.env.ENABLE_TRACING == "1") {
+  console.log("Tracing enabled.")
   const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
   const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
   const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
@@ -40,21 +41,19 @@ if (process.env.ENABLE_TRACING == "1") {
 
   const provider = new NodeTracerProvider();
   
-  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR;
+  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR
 
-  if (collectorUrl) {
-    provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({ url: collectorUrl })));
-    provider.register();
+  provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
+  provider.register();
 
-    registerInstrumentations({
-      instrumentations: [new GrpcInstrumentation()]
-    });
-  } else {
-    console.log("Collector URL not set. Skipping tracing setup.");
-  }
-} else {
-  console.log("Tracing disabled.");
+  registerInstrumentations({
+    instrumentations: [new GrpcInstrumentation()]
+  });
 }
+else {
+  console.log("Tracing disabled.")
+}
+
 
 const path = require('path');
 const HipsterShopServer = require('./server');
@@ -64,12 +63,4 @@ const PROTO_PATH = path.join(__dirname, '/proto/');
 
 const server = new HipsterShopServer(PROTO_PATH, PORT);
 
-server.listen(() => {
-  console.log(`Server started on port ${PORT}`);
-  if (process.env.NODE_ENV === 'build') {
-    console.log("Build environment detected. Exiting...");
-    setTimeout(() => {
-      process.exit(0);
-    }, 1000); // Exit after 1 second
-  }
-});
+server.listen();
